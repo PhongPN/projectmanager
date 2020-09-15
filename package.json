@@ -1,0 +1,44 @@
+{
+  "name": "projectmanager",
+  "version": "1.0.0",
+  "description": "fresherProject",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PhongPN/projectmanager.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/PhongPN/projectmanager/issues"
+  },
+  "homepage": "https://github.com/PhongPN/projectmanager#readme",
+  "dependencies": {
+    "ajv": "^6.12.5",
+    "bcrypt": "^5.0.0",
+    "body-parser": "^1.19.0",
+    "cookie-parse": "^0.4.0",
+    "dotenv": "^8.2.0",
+    "ejs": "^3.1.5",
+    "esm": "^3.2.25",
+    "express": "^4.17.1",
+    "jsonschema": "^1.2.6",
+    "jsonwebtoken": "^8.5.1",
+    "mongoose": "^5.10.5",
+    "mongoose-auto-increment": "^5.0.1",
+    "winston": "^3.3.3",
+    "winston-daily-rotate-file": "^4.5.0"
+  },
+  "devDependencies": {
+    "chai": "^4.2.0",
+    "chai-http": "^4.3.0",
+    "eslint": "^7.9.0",
+    "eslint-plugin-mocha": "^8.0.0",
+    "mocha": "^8.1.3",
+    "nodemon": "^2.0.4",
+    "sinon": "^9.0.3"
+  }
+}
