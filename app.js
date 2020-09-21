@@ -3,8 +3,11 @@ import express from 'express';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 
-import admin from './controller/admin/adminAPI.js';
-import projectKind from './controller/projectKind/projectKindAPI.js';
+import admin from './router/admin.js';
+import projectKind from './router/projectKind.js';
+import projectStatus from './router/projectStatus.js';
+import userGroup from './router/userGroup.js';
+import techStack from './router/techStack.js';
 
 dotenv.config({
   path: '.env',
@@ -41,7 +44,7 @@ app.get('/', (req, res) => {
 });
 
 // handle routes
-app.use('/', [admin, projectKind]);
+app.use('/', [admin, projectKind, projectStatus, userGroup, techStack]);
 
 //connect db and server
 app.listen(port, () => {

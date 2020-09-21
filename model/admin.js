@@ -11,7 +11,7 @@ const adminSchema = new mongoose.Schema({
     require: true,
   },
 
-}, { colection: 'admin' }, { timestamps: { createdAt: 'createdAt', updatedAt: 'updatedAt' } });
+}, { collection: 'admin' }, { timestamps: { createdAt: 'createdAt', updatedAt: 'updatedAt' } });
 
 adminSchema.pre('save', async function save(next) {
   try {

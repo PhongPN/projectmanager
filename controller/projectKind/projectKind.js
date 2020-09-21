@@ -12,10 +12,12 @@ import {
   SERVER_ERROR,
 } from '../../status/status.js';
 
+import { Search } from '../../middleware/fuzzySearch.js';
+
 //Create a kind of project
-const createProjectKind = async (newProjectKind) => {
+const createProjectKind = async (data) => {
   try {
-    if (!newProjectKind.projectKindName || !newProjectKind.projectKindKeyNumber) {
+    if (!data.projectKindName || !data.projectKindKeyNumber) {
       return {
         status: 400,
         code: PROJECT_KIND_INPUT_INVALID,
@@ -23,7 +25,7 @@ const createProjectKind = async (newProjectKind) => {
       };
     }
 
-    if (newProjectKind.projectKindStatus !== 'active' || newProjectKind.projectKindStatus !== 'inactive') {
+    if (data.projectKindStatus !== 'active' && data.projectKindStatus !== 'inactive') {
       return {
         status: 400,
         code: PROJECT_KIND_INPUT_INVALID,
@@ -31,7 +33,7 @@ const createProjectKind = async (newProjectKind) => {
       };
     }
 
-    const findExistProjectKind = await ProjectKind.findOne({ projectKindName: newProjectKind.projectKindName });
+    const findExistProjectKind = await ProjectKind.findOne({ projectKindName: data.projectKindName });
     if (findExistProjectKind !== null) {
       return {
         status: 400,
@@ -40,13 +42,13 @@ const createProjectKind = async (newProjectKind) => {
       };
     }
 
-    const projectKind = await ProjectKind.create(newProjectKind);
+    const createProjectKind = await ProjectKind.create(data);
 
     return {
       status: 200,
       code: CREATE_PROJECT_KIND_SUCCESS,
       message: 'Create project kind success',
-      data: projectKind,
+      data: createProjectKind,
     };
   } catch (err) {
     return {
@@ -58,9 +60,9 @@ const createProjectKind = async (newProjectKind) => {
 };
 
 //Find projects kind by name
-const findProjectKindByName = async (projectKindName, page, limit) => {
+const findProjectKindByName = async (data, page, limit) => {
   try {
-    if (!projectKindName) {
+    if (!data.projectKindName) {
       return {
         status: 400,
         code: PROJECT_KIND_INPUT_INVALID,
@@ -74,17 +76,9 @@ const findProjectKindByName = async (projectKindName, page, limit) => {
       limit = 10;
     }
 
-    const findListUser = (() => {
-      let start = (page - 1) * limit;
-      let end = page * limit;
-      const result = ProjectKind.find({ 'projectKindName': { $regex: `.*${projectKindName}.*`, $options: 'i' } }, 'projectKindName')
-        .skip(start)
-        .limit(end);
+    const findListProjectKind = await Search(ProjectKind, 'projectKindName', data.projectKindName, page, limit);
 
-      return result;
-    });
-
-    if (typeof findListUser === 'undefined') {
+    if (typeof findListProjectKind === 'undefined') {
       return {
         status: 400,
         code: FIND_PROJECT_KIND_FAILED,
@@ -96,7 +90,7 @@ const findProjectKindByName = async (projectKindName, page, limit) => {
       status: 200,
       code: FIND_PROJECT_KIND_SUCCESS,
       message: 'Find project kind success',
-      data: findListUser,
+      data: findListProjectKind,
     };
 
   } catch (err) {
@@ -112,7 +106,7 @@ const findProjectKindByName = async (projectKindName, page, limit) => {
 const findOneProjectKind = async (id) => {
   try {
     const findProjectKind = await ProjectKind.findOne({ _id: id });
-    if (typeof findOndUser === 'undefined') {
+    if (typeof findProjectKind === 'undefined') {
       return {
         status: 400,
         code: FIND_PROJECT_KIND_FAILED,
@@ -148,15 +142,15 @@ const updateProjectKind = async (id, data) => {
       };
     }
 
-    if (data.projectKindStatus !== 'active' || data.projectKindStatus !== 'inactive') {
+    if (data.projectKindStatus !== 'active' && data.projectKindStatus !== 'inactive') {
       return {
         status: 400,
         code: PROJECT_KIND_INPUT_INVALID,
         message: 'Project kind status invalid',
       };
     }
-    let projectKind = await ProjectKind.findOneAndUpdate({ _id: id }, data);
-    if (!projectKind) {
+    let updateProjectKind = await ProjectKind.findOneAndUpdate({ _id: id }, data);
+    if (!updateProjectKind) {
       return {
         status: 400,
         code: UPDATE_PROJECT_KIND_FAILED,
@@ -167,7 +161,7 @@ const updateProjectKind = async (id, data) => {
         status: 200,
         code: UPDATE_PROJECT_KIND_SUCCESS,
         message: 'update project kind success',
-        data: projectKind,
+        data: updateProjectKind,
       };
     }
   } catch (error) {

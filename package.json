@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "description": "fresherProject",
   "main": "app.js",
+  "type": "module",
   "scripts": {
+    "start": "nodemon app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -21,6 +23,7 @@
     "bcrypt": "^5.0.0",
     "body-parser": "^1.19.0",
     "cookie-parse": "^0.4.0",
+    "crypto": "^1.0.1",
     "dotenv": "^8.2.0",
     "ejs": "^3.1.5",
     "esm": "^3.2.25",

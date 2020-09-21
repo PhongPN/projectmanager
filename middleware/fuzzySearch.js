@@ -14,7 +14,6 @@
 export const Search = async (object, property, value, page, limit) => {
   let start = (page - 1) * limit;
   let end = page * limit;
-
   const result = await object.find({ [property]: { $regex: `.*${value}.*`, $options: 'i' } }, property)
     .skip(start)
     .limit(end);
