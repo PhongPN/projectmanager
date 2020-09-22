@@ -1,7 +1,0 @@
-{"status":200,"code":"LOGIN_SUCCESS","message":"Login success","level":"info","timestamp":"2020-09-16T09:05:11.438Z"}
-{"status":500,"code":"SERVER_ERROR","message":"Server error","level":"error","timestamp":"2020-09-16T09:06:44.097Z"}
-{"status":200,"code":"LOGIN_SUCCESS","message":"Login success","level":"info","timestamp":"2020-09-16T09:06:58.230Z"}
-{"status":200,"code":"LOGIN_SUCCESS","message":"Login success","level":"info","timestamp":"2020-09-16T09:07:09.567Z"}
-{"status":200,"code":"LOGIN_SUCCESS","message":"Login success","level":"info","timestamp":"2020-09-16T09:10:55.253Z"}
-{"status":500,"code":"SERVER_ERROR","message":"Server error","level":"error","timestamp":"2020-09-16T09:34:20.657Z"}
-{"status":500,"code":"SERVER_ERROR","message":"Server error","level":"error","timestamp":"2020-09-16T09:40:53.190Z"}

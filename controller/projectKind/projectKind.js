@@ -25,6 +25,7 @@ const createProjectKind = async (data) => {
       };
     }
 
+    // [].includes()
     if (data.projectKindStatus !== 'active' && data.projectKindStatus !== 'inactive') {
       return {
         status: 400,
@@ -34,7 +35,7 @@ const createProjectKind = async (data) => {
     }
 
     const findExistProjectKind = await ProjectKind.findOne({ projectKindName: data.projectKindName });
-    if (findExistProjectKind !== null) {
+    if (!findExistProjectKind) {
       return {
         status: 400,
         code: PROJECT_KIND_EXIST,
@@ -78,7 +79,7 @@ const findProjectKindByName = async (data, page, limit) => {
 
     const findListProjectKind = await Search(ProjectKind, 'projectKindName', data.projectKindName, page, limit);
 
-    if (typeof findListProjectKind === 'undefined') {
+    if (!findListProjectKind) {
       return {
         status: 400,
         code: FIND_PROJECT_KIND_FAILED,
@@ -106,7 +107,7 @@ const findProjectKindByName = async (data, page, limit) => {
 const findOneProjectKind = async (id) => {
   try {
     const findProjectKind = await ProjectKind.findOne({ _id: id });
-    if (typeof findProjectKind === 'undefined') {
+    if (!findProjectKind) {
       return {
         status: 400,
         code: FIND_PROJECT_KIND_FAILED,
@@ -149,7 +150,7 @@ const updateProjectKind = async (id, data) => {
         message: 'Project kind status invalid',
       };
     }
-    let updateProjectKind = await ProjectKind.findOneAndUpdate({ _id: id }, data);
+    const updateProjectKind = await ProjectKind.findOneAndUpdate({ _id: id }, data);
     if (!updateProjectKind) {
       return {
         status: 400,
@@ -176,20 +177,20 @@ const updateProjectKind = async (id, data) => {
 //Delete project kind
 const deleteProjectKind = async (id) => {
   try {
-    let user = await ProjectKind.findOneAndRemove({ _id: id });
-    if (!user) {
+    const deleteProjectKind = await ProjectKind.findOneAndRemove({ _id: id });
+    if (!deleteProjectKind) {
       return {
         status: 400,
         code: DELETE_PROJECT_KIND_FAILED,
         message: 'Delete project kind failed',
       };
-    } else {
-      return {
-        status: 200,
-        code: DELETE_PROJECT_KIND_SUCCESS,
-        message: 'Delete project kind success',
-      };
     }
+
+    return {
+      status: 200,
+      code: DELETE_PROJECT_KIND_SUCCESS,
+      message: 'Delete project kind success',
+    };
   } catch (error) {
     return {
       status: 500,
