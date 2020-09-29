@@ -2,6 +2,7 @@ import {
   createTechStack,
   findOneTechStack,
   findTechStackByName,
+  getTechStack,
   updateTechStack,
   deleteTechStack,
 } from './teckStack.js';
@@ -27,6 +28,15 @@ export const findOneTechStackAPI = async (req, res) => {
 export const findTechStackByNameAPI = async (req, res) => {
   try {
     const result = await findTechStackByName(req.body, req.query.page, req.query.limit);
+    res.status(result.status).json(result);
+  } catch (err) {
+    res.status(err.status).json(err);
+  }
+};
+
+export const getTechStackAPI = async (req, res) => {
+  try {
+    const result = await getTechStack();
     res.status(result.status).json(result);
   } catch (err) {
     res.status(err.status).json(err);

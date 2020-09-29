@@ -12,7 +12,7 @@ const projectStatusSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-}, { collection: 'projectstatus' }, { timestamps: { createdAt: 'createdAt', updatedAt: 'updatedAt' } });
+}, { collection: 'projectstatus' }, { timestamps: { createdAt: Date.now(), updatedAt: 'updateAt' } });
 
 projectStatusSchema.pre('findOneAndUpdate', async function (next) {
   const docToUpdate = await this.model.findOne(this.getQuery());

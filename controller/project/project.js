@@ -1,4 +1,7 @@
 import Project from '../../model/project.js';
+import TechStack from '../../model/techStack.js';
+import ProjectKind from '../../model/projectKind.js';
+import ProjectStatus from '../../model/projectStatus.js';
 import {
   PROJECT_EXIST,
   CREATE_PROJECT_SUCCESS,
@@ -10,43 +13,80 @@ import {
   DELETE_PROJECT_FAILED,
   DELETE_PROJECT_SUCCESS,
   SERVER_ERROR,
+  FIND_TECH_STACK_FAILED,
+  FIND_PROJECT_KIND_FAILED,
+  FIND_PROJECT_STATUS_FAILED,
 } from '../../status/status.js';
 
 import { Search } from '../../middleware/fuzzySearch.js';
+import { createErrorLog } from '../../helper/log.js';
+import { checkNull, checkArray, checkNumber } from '../../helper/checkInput.js';
 
 //Create a kind of project
 const createProject = async (data) => {
   try {
-    if (!data.projectName || !data.projectKindId || !data.projectStatusId || !data.techStackId || !data.employeeId ) {
+
+    //Check input null
+    if (checkNull(data.projectName, data.projectKind, data.projectStatus, data.projectTeckStack, data.projectEmployee) === true) {
       return {
         status: 400,
-        code: PROJECT_INPUT_INVALID,
-        message: 'Missing project profile',
+        message: PROJECT_INPUT_INVALID,
       };
     }
 
+    //Find exist project
     const findExistProject = await Project.findOne({ projectName: data.projectName });
-    if (findExistProject !== null) {
+    if (findExistProject) {
       return {
         status: 400,
-        code: PROJECT_EXIST,
-        message: 'Project kind exist',
+        message: PROJECT_EXIST,
       };
     }
 
+    //Find tech stack
+    const findTechStack = await TechStack.find({ _id: { $in: data.projectTeckStack } });
+
+    if (checkArray(data.projectTeckStack, findTechStack) === false) {
+      return {
+        status: 400,
+        message: FIND_TECH_STACK_FAILED,
+      };
+    }
+
+    //Find project kind
+    const findProjectKind = await ProjectKind.find({ _id: data.projectKind });
+
+    if (!findProjectKind) {
+      return {
+        status: 400,
+        message: FIND_PROJECT_KIND_FAILED,
+      };
+    }
+
+    //Find project kind
+    const findProjectStatus = await ProjectStatus.find({ _id: data.projectStatus });
+
+    if (!findProjectStatus) {
+      return {
+        status: 400,
+        message: FIND_PROJECT_STATUS_FAILED,
+      };
+    }
+
+    //Crete Project
     const createProject = await Project.create(data);
 
     return {
       status: 200,
-      code: CREATE_PROJECT_SUCCESS,
-      message: 'Create project kind success',
+      message: CREATE_PROJECT_SUCCESS,
       data: createProject,
     };
   } catch (err) {
+    createErrorLog({ status: 500, SERVER_ERROR });
+
     return {
       status: 500,
-      code: SERVER_ERROR,
-      message: 'Server error',
+      message: SERVER_ERROR,
     };
   }
 };
@@ -57,39 +97,35 @@ const findProjectByName = async (data, page, limit) => {
     if (!data.projectName) {
       return {
         status: 400,
-        code: PROJECT_INPUT_INVALID,
-        message: 'Project kind name invalid',
+        message: PROJECT_INPUT_INVALID,
       };
     }
-    if (typeof (page) !== Number) {
+    if (checkNumber(page) === false) {
       page = 1;
     }
-    if (typeof (limit) !== Number) {
+    if (checkNumber(limit) === false) {
       limit = 10;
     }
 
     const findListProject = await Search(Project, 'projectName', data.projectName, page, limit);
 
-    if (typeof findListProject === 'undefined') {
+    if (!findListProject) {
       return {
         status: 400,
-        code: FIND_PROJECT_FAILED,
-        message: 'Project kind not found',
+        message: FIND_PROJECT_FAILED,
       };
     }
 
     return {
       status: 200,
-      code: UPDATE_PROJECT_SUCCESS,
-      message: 'Find project kind success',
+      message: FIND_PROJECT_SUCCESS,
       data: findListProject,
     };
 
   } catch (err) {
     return {
       status: 500,
-      code: SERVER_ERROR,
-      message: 'Server error',
+      message: SERVER_ERROR,
     };
   }
 };
@@ -98,18 +134,16 @@ const findProjectByName = async (data, page, limit) => {
 const findOneProject = async (id) => {
   try {
     const findProject = await Project.findOne({ _id: id });
-    if (typeof findProject === 'undefined') {
+    if (!findProject) {
       return {
         status: 400,
-        code: FIND_PROJECT_FAILED,
-        message: 'Project kind not found',
+        message: FIND_PROJECT_FAILED,
       };
     }
     else {
       return {
         status: 200,
-        code: FIND_PROJECT_SUCCESS,
-        message: 'Find project kind success',
+        message: FIND_PROJECT_SUCCESS,
         data: findProject,
       };
     }
@@ -117,8 +151,7 @@ const findOneProject = async (id) => {
   catch (err) {
     return {
       status: 500,
-      code: SERVER_ERROR,
-      message: 'Server error',
+      message: SERVER_ERROR,
     };
   }
 };
@@ -126,33 +159,23 @@ const findOneProject = async (id) => {
 //Update project kind
 const updateProject = async (id, data) => {
   try {
-    if (!data.projectName) {
-      return {
-        status: 400,
-        code: PROJECT_INPUT_INVALID,
-        message: 'Missing project kind profile',
-      };
-    }
-    let updateProject = await Project.findOneAndUpdate({ _id: id }, data);
+    const updateProject = await Project.findOneAndUpdate({ _id: id }, data);
     if (!updateProject) {
       return {
         status: 400,
-        code: UPDATE_PROJECT_FAILED,
-        message: 'Update project kind failed',
+        message: UPDATE_PROJECT_FAILED,
       };
     } else {
       return {
         status: 200,
-        code: UPDATE_PROJECT_SUCCESS,
-        message: 'update project kind success',
+        message: UPDATE_PROJECT_SUCCESS,
         data: updateProject,
       };
     }
   } catch (error) {
     return {
       status: 500,
-      code: SERVER_ERROR,
-      message: 'Server error',
+      message: SERVER_ERROR,
     };
   }
 };
@@ -160,25 +183,22 @@ const updateProject = async (id, data) => {
 //Delete project kind
 const deleteProject = async (id) => {
   try {
-    let user = await Project.findOneAndRemove({ _id: id });
-    if (!user) {
+    const deleteProject = await Project.findOneAndRemove({ _id: id });
+    if (!deleteProject) {
       return {
         status: 400,
-        code: DELETE_PROJECT_FAILED,
-        message: 'Delete project kind failed',
+        message: DELETE_PROJECT_FAILED,
       };
     } else {
       return {
         status: 200,
-        code: DELETE_PROJECT_SUCCESS,
-        message: 'Delete project kind success',
+        message: DELETE_PROJECT_SUCCESS,
       };
     }
   } catch (error) {
     return {
       status: 500,
-      code: SERVER_ERROR,
-      message: 'Server error',
+      message: SERVER_ERROR,
     };
   }
 };

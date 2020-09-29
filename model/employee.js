@@ -23,7 +23,7 @@ const employeeSchema = new mongoose.Schema({
     required: true,
   },
   employeeCertificate: {
-    type: Number,
+    type: String,
     required: true,
   },
   employeeForeignlanguage: {
@@ -46,13 +46,11 @@ const employeeSchema = new mongoose.Schema({
   ],
   employeeProject: [
     {
-      projectId: {
-        type: objectId,
-        ref: 'project',
-      },
+      type: objectId,
+      ref: 'project',
     },
   ],
-}, { collection: 'department' }, { timestamps: { createdAt: 'createdAt', updatedAt: 'updatedAt' } });
+}, { collection: 'employee' }, { timestamps: { createdAt: Date.now(), updatedAt: 'updateAt' } });
 
 employeeSchema.pre('findOneAndUpdate', async function (next) {
   const docToUpdate = await this.model.findOne(this.getQuery());

@@ -7,10 +7,10 @@ const departmentSchema = new mongoose.Schema({
     required: true,
   },
   departmentResponsibility: {
-    type: Number,
+    type: String,
     required: true,
   },
-  departmentTechStackId: [
+  departmentTechStack: [
     {
       type: objectId,
       required: true,
@@ -19,33 +19,17 @@ const departmentSchema = new mongoose.Schema({
   ],
   departmentProject: [
     {
-      projectId: {
-        type: objectId,
-        required: true,
-        ref: 'project',
-      },
+      type: objectId,
+      ref: 'project',
     },
   ],
   departmentEmployee: [
     {
-      employeeId: {
-        type: String,
-        required: true,
-        ref: 'employee',
-      },
+      type: objectId,
+      ref: 'employee',
     },
   ],
-}, { collection: 'department' }, { timestamps: { createdAt: 'createdAt', updatedAt: 'updatedAt' } });
-
-departmentSchema.pre('save', async function save(next) {
-  try {
-    this.createdAt = Date.now();
-
-    return next();
-  } catch (err) {
-    return next(err);
-  }
-});
+}, { collection: 'department' }, { timestamps: { createdAt: Date.now(), updatedAt: 'updateAt' } });
 
 departmentSchema.pre('findOneAndUpdate', async function (next) {
   const docToUpdate = await this.model.findOne(this.getQuery());

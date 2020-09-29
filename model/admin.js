@@ -11,7 +11,7 @@ const adminSchema = new mongoose.Schema({
     require: true,
   },
 
-}, { collection: 'admin' }, { timestamps: { createdAt: 'createdAt', updatedAt: 'updatedAt' } });
+}, { collection: 'admin' }, { timestamps: { createdAt: Date.now() } });
 
 adminSchema.pre('save', async function save(next) {
   try {
@@ -24,18 +24,12 @@ adminSchema.pre('save', async function save(next) {
   }
 });
 
-adminSchema.statics.verifyPassword = async function (verifyUser) {
-  const admin = await this.findOne({ userName: verifyUser.username });
-  if (!admin) {
-    return { error: true, message: 'Admin not found' };
-  } else {
-    if (bcrypt.compareSync(verifyUser.password, admin.passWord)) {
-      return { error: false, message: 'Login success' };
-    } else {
-      return { error: true, message: 'Incorrect password' };
-    }
+adminSchema.statics.verifyPassword = async function (verifyUser, admin) {
+  if (bcrypt.compareSync(verifyUser.password, admin.passWord)) {
+    return true;
   }
 
+  return false;
 };
 const Admin = mongoose.model('admin', adminSchema);
 

@@ -12,7 +12,7 @@ const techStackSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-}, { collection: 'teckstack' }, { timestamps: { createdAt: 'createdAt', updatedAt: 'updatedAt' } });
+}, { collection: 'teckstack' }, { timestamps: { createdAt: Date.now(), updatedAt: 'updatedAt' } });
 
 techStackSchema.pre('findOneAndUpdate', async function (next) {
   const docToUpdate = await this.model.findOne(this.getQuery());

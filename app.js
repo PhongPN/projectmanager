@@ -8,6 +8,9 @@ import projectKind from './router/projectKind.js';
 import projectStatus from './router/projectStatus.js';
 import userGroup from './router/userGroup.js';
 import techStack from './router/techStack.js';
+import department from './router/department.js';
+import project from './router/project.js';
+import employee from './router/employee.js';
 
 dotenv.config({
   path: '.env',
@@ -44,7 +47,7 @@ app.get('/', (req, res) => {
 });
 
 // handle routes
-app.use('/', [admin, projectKind, projectStatus, userGroup, techStack]);
+app.use('/', [admin, projectKind, projectStatus, userGroup, techStack, department, project, employee ]);
 
 //connect db and server
 app.listen(port, () => {

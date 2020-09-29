@@ -13,49 +13,48 @@ import {
 } from '../../status/status.js';
 
 import { Search } from '../../middleware/fuzzySearch.js';
+import { checkStatus, checkNumber } from '../../helper/checkInput.js';
+import { createErrorLog, createSuccessLog } from '../../helper/log.js';
 
 //Create a kind of project
 const createProjectKind = async (data) => {
   try {
-    if (!data.projectKindName || !data.projectKindKeyNumber) {
+    if (!data.projectKindName || !checkNumber(data.projectKindKeyNumber)) {
       return {
         status: 400,
-        code: PROJECT_KIND_INPUT_INVALID,
-        message: 'Missing project kind profile',
+        message: PROJECT_KIND_INPUT_INVALID,
       };
     }
 
-    // [].includes()
-    if (data.projectKindStatus !== 'active' && data.projectKindStatus !== 'inactive') {
+    if (!checkStatus(data.projectKindStatus)) {
       return {
         status: 400,
-        code: PROJECT_KIND_INPUT_INVALID,
-        message: 'Project kind status invalid',
+        message: PROJECT_KIND_INPUT_INVALID,
       };
     }
 
     const findExistProjectKind = await ProjectKind.findOne({ projectKindName: data.projectKindName });
-    if (!findExistProjectKind) {
+    if (findExistProjectKind) {
       return {
         status: 400,
-        code: PROJECT_KIND_EXIST,
-        message: 'Project kind exist',
+        message: PROJECT_KIND_EXIST,
       };
     }
 
     const createProjectKind = await ProjectKind.create(data);
+    createSuccessLog({ status: 200, message: CREATE_PROJECT_KIND_SUCCESS });
 
     return {
       status: 200,
-      code: CREATE_PROJECT_KIND_SUCCESS,
-      message: 'Create project kind success',
+      message: CREATE_PROJECT_KIND_SUCCESS,
       data: createProjectKind,
     };
   } catch (err) {
+    createErrorLog({ status: 500, message: SERVER_ERROR });
+
     return {
       status: 500,
-      code: SERVER_ERROR,
-      message: 'Server error',
+      message: SERVER_ERROR,
     };
   }
 };
@@ -66,8 +65,7 @@ const findProjectKindByName = async (data, page, limit) => {
     if (!data.projectKindName) {
       return {
         status: 400,
-        code: PROJECT_KIND_INPUT_INVALID,
-        message: 'Project kind name invalid',
+        message: PROJECT_KIND_INPUT_INVALID,
       };
     }
     if (typeof (page) !== Number) {
@@ -82,23 +80,22 @@ const findProjectKindByName = async (data, page, limit) => {
     if (!findListProjectKind) {
       return {
         status: 400,
-        code: FIND_PROJECT_KIND_FAILED,
-        message: 'Project kind not found',
+        message: FIND_PROJECT_KIND_FAILED,
       };
     }
 
     return {
       status: 200,
-      code: FIND_PROJECT_KIND_SUCCESS,
-      message: 'Find project kind success',
+      message: FIND_PROJECT_KIND_SUCCESS,
       data: findListProjectKind,
     };
 
   } catch (err) {
+    createErrorLog({ status: 500, message: SERVER_ERROR });
+
     return {
       status: 500,
-      code: SERVER_ERROR,
-      message: 'Server error',
+      message: SERVER_ERROR,
     };
   }
 };
@@ -110,24 +107,22 @@ const findOneProjectKind = async (id) => {
     if (!findProjectKind) {
       return {
         status: 400,
-        code: FIND_PROJECT_KIND_FAILED,
-        message: 'Project kind not found',
+        message: FIND_PROJECT_KIND_FAILED,
       };
     }
-    else {
-      return {
-        status: 200,
-        code: FIND_PROJECT_KIND_SUCCESS,
-        message: 'Find project kind success',
-        data: findProjectKind,
-      };
-    }
+
+    return {
+      status: 200,
+      message: FIND_PROJECT_KIND_SUCCESS,
+      data: findProjectKind,
+    };
   }
   catch (err) {
+    createErrorLog({ status: 500, message: SERVER_ERROR });
+
     return {
       status: 500,
-      code: SERVER_ERROR,
-      message: 'Server error',
+      message: SERVER_ERROR,
     };
   }
 };
@@ -135,41 +130,38 @@ const findOneProjectKind = async (id) => {
 //Update project kind
 const updateProjectKind = async (id, data) => {
   try {
-    if (!data.projectKindName || !data.projectKindKeyNumber) {
+    if (!data.projectKindName || !checkNumber(data.projectKindKeyNumber) ) {
       return {
         status: 400,
-        code: PROJECT_KIND_INPUT_INVALID,
-        message: 'Missing project kind profile',
+        message: PROJECT_KIND_INPUT_INVALID,
       };
     }
 
-    if (data.projectKindStatus !== 'active' && data.projectKindStatus !== 'inactive') {
+    if (!checkStatus(data.projectKindStatus)) {
       return {
         status: 400,
-        code: PROJECT_KIND_INPUT_INVALID,
-        message: 'Project kind status invalid',
+        message: PROJECT_KIND_INPUT_INVALID,
       };
     }
     const updateProjectKind = await ProjectKind.findOneAndUpdate({ _id: id }, data);
     if (!updateProjectKind) {
       return {
         status: 400,
-        code: UPDATE_PROJECT_KIND_FAILED,
-        message: 'Update project kind failed',
-      };
-    } else {
-      return {
-        status: 200,
-        code: UPDATE_PROJECT_KIND_SUCCESS,
-        message: 'update project kind success',
-        data: updateProjectKind,
+        message: UPDATE_PROJECT_KIND_FAILED,
       };
     }
+
+    return {
+      status: 200,
+      message: UPDATE_PROJECT_KIND_SUCCESS,
+      data: updateProjectKind,
+    };
   } catch (error) {
+    createErrorLog({ status: 500, message: SERVER_ERROR });
+
     return {
       status: 500,
-      code: SERVER_ERROR,
-      message: 'Server error',
+      message: SERVER_ERROR,
     };
   }
 };
@@ -181,21 +173,20 @@ const deleteProjectKind = async (id) => {
     if (!deleteProjectKind) {
       return {
         status: 400,
-        code: DELETE_PROJECT_KIND_FAILED,
-        message: 'Delete project kind failed',
+        message: DELETE_PROJECT_KIND_FAILED,
       };
     }
 
     return {
       status: 200,
-      code: DELETE_PROJECT_KIND_SUCCESS,
-      message: 'Delete project kind success',
+      message: DELETE_PROJECT_KIND_SUCCESS,
     };
   } catch (error) {
+    createErrorLog({ status: 500, message: SERVER_ERROR });
+
     return {
       status: 500,
-      code: SERVER_ERROR,
-      message: 'Server error',
+      message: SERVER_ERROR,
     };
   }
 };

@@ -1,72 +1,71 @@
 import UserGroup from '../../model/userGroup.js';
-
 import {
-  SERVER_ERROR,
   USER_GROUP_EXIST,
-  USER_GROUP_INPUT_INVALID,
   CREATE_USER_GROUP_SUCCESS,
+  USER_GROUP_INPUT_INVALID,
   FIND_USER_GROUP_FAILED,
   FIND_USER_GROUP_SUCCESS,
   UPDATE_USER_GROUP_FAILED,
   UPDATE_USER_GROUP_SUCCESS,
   DELETE_USER_GROUP_FAILED,
   DELETE_USER_GROUP_SUCCESS,
+  SERVER_ERROR,
 } from '../../status/status.js';
 
 import { Search } from '../../middleware/fuzzySearch.js';
-//Create a status of project
+import { checkStatus, checkNumber } from '../../helper/checkInput.js';
+import { createErrorLog, createSuccessLog } from '../../helper/log.js';
+
+//Create a user group
 const createUserGroup = async (data) => {
   try {
-    if (!data.userGroupName || !data.projectKindKeyNumber) {
+    if (!data.userGroupName || !checkNumber(data.userGroupKeyNumber)) {
       return {
         status: 400,
-        code: USER_GROUP_INPUT_INVALID,
-        message: 'Missing user group name',
+        message: USER_GROUP_INPUT_INVALID,
       };
     }
 
-    if (data.userGroupStatus !== 'active' && data.userGroupStatus !== 'inactive') {
+    if (!checkStatus(data.userGroupStatus)) {
       return {
         status: 400,
-        code: USER_GROUP_INPUT_INVALID,
-        message: 'User group status invalid',
+        message: USER_GROUP_INPUT_INVALID,
       };
     }
 
     const findExistUserGroup = await UserGroup.findOne({ userGroupName: data.userGroupName });
-    if (findExistUserGroup !== null) {
+    if (findExistUserGroup) {
       return {
         status: 400,
-        code: USER_GROUP_EXIST,
-        message: 'User group exist',
+        message: USER_GROUP_EXIST,
       };
     }
 
-    const userGroup = await UserGroup.create(data);
+    const createUserGroup = await UserGroup.create(data);
+    createSuccessLog({ status: 200, message: CREATE_USER_GROUP_SUCCESS });
 
     return {
       status: 200,
-      code: CREATE_USER_GROUP_SUCCESS,
-      message: 'Create user group success',
-      data: userGroup,
+      message: CREATE_USER_GROUP_SUCCESS,
+      data: createUserGroup,
     };
   } catch (err) {
+    createErrorLog({ status: 500, message: SERVER_ERROR });
+
     return {
       status: 500,
-      code: SERVER_ERROR,
-      message: 'Server error',
+      message: SERVER_ERROR,
     };
   }
 };
 
-//Find projects status by name
+//Find user group by name
 const findUserGroupByName = async (data, page, limit) => {
   try {
     if (!data.userGroupName) {
       return {
         status: 400,
-        code: USER_GROUP_INPUT_INVALID,
-        message: 'User group name invalid',
+        message: USER_GROUP_INPUT_INVALID,
       };
     }
     if (typeof (page) !== Number) {
@@ -78,123 +77,116 @@ const findUserGroupByName = async (data, page, limit) => {
 
     const findListUserGroup = await Search(UserGroup, 'userGroupName', data.userGroupName, page, limit);
 
-    if (typeof findListUserGroup === 'undefined') {
+    if (!findListUserGroup) {
       return {
         status: 400,
-        code: FIND_USER_GROUP_FAILED,
-        message: 'User group not found',
+        message: FIND_USER_GROUP_FAILED,
       };
     }
 
     return {
       status: 200,
-      code: FIND_USER_GROUP_SUCCESS,
-      message: 'Find user group success',
+      message: FIND_USER_GROUP_SUCCESS,
       data: findListUserGroup,
     };
 
   } catch (err) {
+    createErrorLog({ status: 500, message: SERVER_ERROR });
+
     return {
       status: 500,
-      code: SERVER_ERROR,
-      message: 'Server error',
+      message: SERVER_ERROR,
     };
   }
 };
 
-//Find ond project kind by id
+//Find ond user group by id
 const findOneUserGroup = async (id) => {
   try {
     const findUserGroup = await UserGroup.findOne({ _id: id });
-    if (typeof findUserGroup === 'undefined') {
+    if (!findUserGroup) {
       return {
         status: 400,
-        code: FIND_USER_GROUP_FAILED,
-        message: 'User group not found',
+        message: FIND_USER_GROUP_FAILED,
       };
     }
-    else {
-      return {
-        status: 200,
-        code: FIND_USER_GROUP_SUCCESS,
-        message: 'Find user group success',
-        data: findUserGroup,
-      };
-    }
+
+    return {
+      status: 200,
+      message: FIND_USER_GROUP_SUCCESS,
+      data: findUserGroup,
+    };
   }
   catch (err) {
+    createErrorLog({ status: 500, message: SERVER_ERROR });
+
     return {
       status: 500,
-      code: SERVER_ERROR,
-      message: 'Server error',
+      message: SERVER_ERROR,
     };
   }
 };
 
-//Update project kind
+//Update user group
 const updateUserGroup = async (id, data) => {
   try {
-    if (!data.userGroupName  || !data.projectKindKeyNumber) {
+    if (!data.userGroupName || !checkNumber(data.userGroupKeyNumber)) {
       return {
         status: 400,
-        code: USER_GROUP_INPUT_INVALID,
-        message: 'Missing user group profile',
+        message: USER_GROUP_INPUT_INVALID,
       };
     }
 
-    if (data.userGroupStatus !== 'active' && data.userGroupStatus !== 'inactive') {
+    if (!checkStatus(data.userGroupStatus)) {
       return {
         status: 400,
-        code: USER_GROUP_INPUT_INVALID,
-        message: 'User group status invalid',
+        message: USER_GROUP_INPUT_INVALID,
       };
     }
-    let userGroup = await UserGroup.findOneAndUpdate({ _id: id }, data);
-    if (!userGroup) {
+    const updateUserGroup = await UserGroup.findOneAndUpdate({ _id: id }, data);
+    if (!updateUserGroup) {
       return {
         status: 400,
-        code: UPDATE_USER_GROUP_FAILED,
-        message: 'Update user group failed',
-      };
-    } else {
-      return {
-        status: 200,
-        code: UPDATE_USER_GROUP_SUCCESS,
-        message: 'update user group success',
-        data: userGroup,
+        message: UPDATE_USER_GROUP_FAILED,
       };
     }
+
+    return {
+      status: 200,
+      message: UPDATE_USER_GROUP_SUCCESS,
+      data: updateUserGroup,
+    };
   } catch (error) {
+    createErrorLog({ status: 500, message: SERVER_ERROR });
+
     return {
       status: 500,
-      code: SERVER_ERROR,
-      message: 'Server error',
+      message: SERVER_ERROR,
     };
   }
 };
 
-//Delete project kind
+//Delete user group
 const deleteUserGroup = async (id) => {
   try {
-    let userGroup = await UserGroup.findOneAndRemove({ _id: id });
-    if (!userGroup) {
+    const deleteUserGroup = await UserGroup.findOneAndRemove({ _id: id });
+    if (!deleteUserGroup) {
       return {
         status: 400,
-        code: DELETE_USER_GROUP_FAILED,
-        message: 'Delete project kind failed',
-      };
-    } else {
-      return {
-        status: 200,
-        code: DELETE_USER_GROUP_SUCCESS,
-        message: 'Delete project kind success',
+        message: DELETE_USER_GROUP_FAILED,
       };
     }
+
+    return {
+      status: 200,
+      message: DELETE_USER_GROUP_SUCCESS,
+    };
   } catch (error) {
+    createErrorLog({ status: 500, message: SERVER_ERROR });
+
     return {
       status: 500,
-      code: SERVER_ERROR,
-      message: 'Server error',
+      message: SERVER_ERROR,
     };
   }
 };

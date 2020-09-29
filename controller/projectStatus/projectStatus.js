@@ -14,31 +14,31 @@ import {
 } from '../../status/status.js';
 
 import { Search } from '../../middleware/fuzzySearch.js';
+import { checkStatus } from '../../helper/checkInput.js';
+import { createErrorLog } from '../../helper/log.js';
 //Create a status of project
 const createProjectStatus = async (data) => {
   try {
     if (!data.projectStatusName) {
       return {
         status: 400,
-        code: PROJECT_STATUS_INPUT_INVALID,
-        message: 'Missing project status name',
+        message: PROJECT_STATUS_INPUT_INVALID,
       };
     }
 
-    if (data.projectStatusStatus !== 'active' && data.projectStatusStatus !== 'inactive') {
+    if (!checkStatus(data.projectStatusStatus)) {
       return {
         status: 400,
-        code: PROJECT_STATUS_INPUT_INVALID,
-        message: 'Project status status invalid',
+        message: PROJECT_STATUS_INPUT_INVALID,
       };
     }
 
     const findExistProjectStatus = await ProjectStatus.findOne({ projectStatusName: data.projectStatusName });
-    if (findExistProjectStatus !== null) {
+
+    if (findExistProjectStatus) {
       return {
         status: 400,
-        code: PROJECT_STATUS_EXIST,
-        message: 'Project status exist',
+        message: PROJECT_STATUS_EXIST,
       };
     }
 
@@ -46,15 +46,15 @@ const createProjectStatus = async (data) => {
 
     return {
       status: 200,
-      code: CREATE_PROJECT_STATUS_SUCCESS,
-      message: 'Create project status success',
+      message: CREATE_PROJECT_STATUS_SUCCESS,
       data: projectStatus,
     };
   } catch (err) {
+    createErrorLog({ status: 500, message: SERVER_ERROR });
+
     return {
       status: 500,
-      code: SERVER_ERROR,
-      message: 'Server error',
+      message: SERVER_ERROR,
     };
   }
 };
@@ -65,8 +65,7 @@ const findProjectStatusByName = async (data, page, limit) => {
     if (!data.projectStatusName) {
       return {
         status: 400,
-        code: PROJECT_STATUS_INPUT_INVALID,
-        message: 'Project kind name invalid',
+        message: PROJECT_STATUS_INPUT_INVALID,
       };
     }
     if (typeof (page) !== Number) {
@@ -78,124 +77,119 @@ const findProjectStatusByName = async (data, page, limit) => {
 
     const findListProjectStatus = await Search(ProjectStatus, 'projectStatusName', data.projectStatusName, page, limit);
 
-    if (typeof findListProjectStatus === 'undefined') {
+    if (!findListProjectStatus) {
       return {
         status: 400,
-        code: FIND_PROJECT_STATUS_FAILED,
-        message: 'Project kind not found',
+        message: FIND_PROJECT_STATUS_FAILED,
       };
     }
 
     return {
       status: 200,
-      code: FIND_PROJECT_STATUS_SUCCESS,
-      message: 'Find project kind success',
+      message: FIND_PROJECT_STATUS_SUCCESS,
       data: findListProjectStatus,
     };
 
   } catch (err) {
+    createErrorLog({ status: 500, message: SERVER_ERROR });
+
     return {
       status: 500,
-      code: SERVER_ERROR,
-      message: 'Server error',
+      message: SERVER_ERROR,
     };
   }
 };
 
 
-//Find ond project kind by id
-const findOneProjectStatus= async (id) => {
+//Find ond project status by id
+const findOneProjectStatus = async (id) => {
   try {
-    const findProjectStatus= await ProjectStatus.findOne({ _id: id });
-    if (typeof findProjectStatus === 'undefined') {
+    const findProjectStatus = await ProjectStatus.findOne({ _id: id });
+    if (!findProjectStatus) {
       return {
         status: 400,
-        code: FIND_PROJECT_STATUS_FAILED,
-        message: 'Project status not found',
+        message: FIND_PROJECT_STATUS_FAILED,
       };
     }
-    else {
-      return {
-        status: 200,
-        code: FIND_PROJECT_STATUS_SUCCESS,
-        message: 'Find project status success',
-        data: findProjectStatus,
-      };
-    }
+
+    return {
+      status: 200,
+      message: FIND_PROJECT_STATUS_SUCCESS,
+      data: findProjectStatus,
+    };
+
   }
   catch (err) {
+    createErrorLog({ status: 500, message: SERVER_ERROR });
+
     return {
       status: 500,
-      code: SERVER_ERROR,
-      message: 'Server error',
+      message: SERVER_ERROR,
     };
   }
 };
 
-//Update project kind
+//Update project status
 const updateProjectStatus = async (id, data) => {
   try {
     if (!data.projectStatusName) {
       return {
         status: 400,
-        code: PROJECT_STATUS_INPUT_INVALID,
-        message: 'Missing project kind profile',
+        message: PROJECT_STATUS_INPUT_INVALID,
       };
     }
 
-    if (data.projectStatusStatus !== 'active' && data.projectStatusStatus !== 'inactive') {
+    if (!checkStatus(data.projectStatusStatus)) {
       return {
         status: 400,
-        code: PROJECT_STATUS_INPUT_INVALID,
-        message: 'Project kind status invalid',
+        message: PROJECT_STATUS_INPUT_INVALID,
       };
     }
-    let projectStatus = await ProjectStatus.findOneAndUpdate({ _id: id }, data);
+    const projectStatus = await ProjectStatus.findOneAndUpdate({ _id: id }, data);
     if (!projectStatus) {
       return {
         status: 400,
-        code: UPDATE_PROJECT_STATUS_FAILED,
-        message: 'Update project status failed',
-      };
-    } else {
-      return {
-        status: 200,
-        code: UPDATE_PROJECT_STATUS_SUCCESS,
-        message: 'update project status success',
-        data: projectStatus,
+        message: UPDATE_PROJECT_STATUS_FAILED,
       };
     }
+
+    return {
+      status: 200,
+      message: UPDATE_PROJECT_STATUS_SUCCESS,
+      data: projectStatus,
+    };
+
   } catch (error) {
+    createErrorLog({ status: 500, message: SERVER_ERROR });
+
     return {
       status: 500,
-      code: SERVER_ERROR,
-      message: 'Server error',
+      message: SERVER_ERROR,
     };
   }
 };
 
-//Delete project kind
+//Delete project status
 const deleteProjectStatus = async (id) => {
   try {
-    let projectStatus = await ProjectStatus.findOneAndRemove({ _id: id });
+    const projectStatus = await ProjectStatus.findOneAndRemove({ _id: id });
     if (!projectStatus) {
       return {
         status: 400,
-        code: DELETE_PROJECT_STATUS_FAILED,
-        message: 'Delete project kind failed',
-      };
-    } else {
-      return {
-        status: 200,
-        code: DELETE_PROJECT_STATUS_SUCCESS,
-        message: 'Delete project kind success',
+        message: DELETE_PROJECT_STATUS_FAILED,
       };
     }
+
+    return {
+      status: 200,
+      message: DELETE_PROJECT_STATUS_SUCCESS,
+    };
   } catch (error) {
+    createErrorLog({ status: 500, message: SERVER_ERROR });
+
     return {
       status: 500,
-      code: SERVER_ERROR,
-      message: 'Server error',
+      message: SERVER_ERROR,
     };
   }
 };

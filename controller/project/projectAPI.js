@@ -1,50 +1,50 @@
 import {
-  createEmployee,
-  findOneEmployee,
-  findEmployeeByName,
-  updateEmployee,
-  deleteEmployee,
-} from './employee.js';
+  createProject,
+  findOneProject,
+  findProjectByName,
+  updateProject,
+  deleteProject,
+} from './project.js';
 
-export const createEmployeeAPI = async (req, res) => {
+export const createProjectAPI = async (req, res) => {
   try {
-    const result = await createEmployee(req.body);
+    const result = await createProject(req.body);
     res.status(result.status).json(result);
   } catch (err) {
     res.status(err.status).json(err);
   }
 };
 
-export const findOneEmployeeAPI = async (req, res) => {
+export const findOneProjectAPI = async (req, res) => {
   try {
-    const result = await findOneEmployee(req.params.id);
+    const result = await findOneProject(req.params.id);
     res.status(result.status).json(result);
   } catch (err) {
     res.status(err.status).json(err);
   }
 };
 
-export const findEmployeeByNameAPI = async (req, res) => {
+export const findProjectByNameAPI = async (req, res) => {
   try {
-    const result = await findEmployeeByName(req.body, req.query.page, req.query.limit);
+    const result = await findProjectByName(req.body, req.query.page, req.query.limit);
     res.status(result.status).json(result);
   } catch (err) {
     res.status(err.status).json(err);
   }
 };
 
-export const updateEmployeeAPI = async (req, res) => {
+export const updateProjectAPI = async (req, res) => {
   try {
-    const result = await updateEmployee(req.params.id, req.body);
+    const result = await updateProject(req.params.id, req.body);
     res.status(result.status).json(result);
   } catch (err) {
     res.status(err.status).json(err);
   }
 };
 
-export const deleteEmployeeAPI = async (req, res) => {
+export const deleteProjectAPI = async (req, res) => {
   try {
-    const result = await deleteEmployee(req.params.id);
+    const result = await deleteProject(req.params.id);
     res.status(result.status).json(result);
   } catch (err) {
     res.status(err.status).json(err);

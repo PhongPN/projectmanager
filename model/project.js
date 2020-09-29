@@ -6,35 +6,31 @@ const projectSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  projectKindId: {
+  projectKind: {
     type: objectId,
     required: true,
     ref: 'projectkind',
   },
-  projectStatusId: {
+  projectStatus: {
     type: objectId,
     required: true,
     ref: 'projectstatus',
   },
   projectTeckStack: [
     {
-      techStackId: {
-        type: objectId,
-        required: true,
-        ref: 'teckstack',
-      },
+      type: objectId,
+      required: true,
+      ref: 'teckstack',
     },
   ],
   projectEmployee: [
     {
-      employeeId: {
-        type: objectId,
-        required: true,
-        ref: 'employee',
-      },
+      type: String,
+      required: true,
+      ref: 'employee',
     },
   ],
-}, { collection: 'project' }, { timestamps: { createdAt: 'createdAt', updatedAt: 'updatedAt' } });
+}, { collection: 'project' }, { timestamps: { createdAt: Date.now(), updatedAt: 'updateAt' } });
 
 projectSchema.pre('findOneAndUpdate', async function (next) {
   const docToUpdate = await this.model.findOne(this.getQuery());
@@ -47,6 +43,6 @@ projectSchema.pre('findOneAndUpdate', async function (next) {
   next();
 });
 
-const Project = mongoose.model('department', projectSchema);
+const Project = mongoose.model('project', projectSchema);
 
 export default Project;

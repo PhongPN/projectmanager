@@ -13,7 +13,7 @@ const projectKindSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-}, { collection: 'projectkind' }, { timestamps: { createdAt: 'createdAt', updatedAt: 'updatedAt' } });
+}, { collection: 'projectkind' }, { timestamps: { createdAt: Date.now(), updatedAt: 'updateAt' } });
 
 projectKindSchema.pre('findOneAndUpdate', async function (next) {
   const docToUpdate = await this.model.findOne(this.getQuery());

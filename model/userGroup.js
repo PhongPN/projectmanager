@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 
 const userGroupSchema = new mongoose.Schema({
+
   userGroupName: {
     type: String,
     required: true,
@@ -16,7 +17,7 @@ const userGroupSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-}, { conllection: 'usergroup' }, { timestamps: { createdAt: 'createdAt', updatedAt: 'updatedAt' } });
+}, { conllection: 'usergroup' }, { timestamps: { createdAt: Date.now(), updatedAt: 'updatedAt' } });
 
 userGroupSchema.pre('findOneAndUpdate', async function (next) {
   const docToUpdate = await this.model.findOne(this.getQuery());

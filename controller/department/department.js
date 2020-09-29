@@ -1,4 +1,7 @@
 import Department from '../../model/department.js';
+import TechStack from '../../model/techStack.js';
+import Project from '../../model/project.js';
+import Employee from '../../model/employee.js';
 import {
   DEPARTMENT_EXIST,
   CREATE_DEPARTMENT_SUCCESS,
@@ -10,44 +13,80 @@ import {
   DELETE_DEPARTMENT_FAILED,
   DELETE_DEPARTMENT_SUCCESS,
   SERVER_ERROR,
+  FIND_TECH_STACK_FAILED,
+  FIND_EMPLOYEE_FAILED,
+  FIND_PROJECT_FAILED,
 } from '../../status/status.js';
 
 import { Search } from '../../middleware/fuzzySearch.js';
+import { createErrorLog } from '../../helper/log.js';
+import { checkNull, checkArray, checkNumber } from '../../helper/checkInput.js';
 
 //Create a kind of project
 const createDepartment = async (data) => {
   try {
-    if (!data.departmentName || !data.departmentResponsibility
-      || !data.departmentTechStackId || !data.departmentProject || !data.departmentEmployee ) {
+    //Check null
+
+    if (checkNull(data.departmentName, data.departmentResponsibility
+      , data.departmentTechStack) === true) {
+
       return {
         status: 400,
-        code: DEPARTMENT_INPUT_INVALID,
-        message: 'Missing department profile',
+        message: DEPARTMENT_INPUT_INVALID,
       };
     }
 
+    //Find exist department
     const findExistDepartment = await Department.findOne({ departmentName: data.departmentName });
-    if (findExistDepartment !== null) {
+    if (findExistDepartment) {
       return {
         status: 400,
-        code: DEPARTMENT_EXIST,
-        message: 'Project kind exist',
+        message: DEPARTMENT_EXIST,
       };
     }
 
+    //Find tech stack
+    const findTechStack = await TechStack.find({ _id: { $in: data.departmentTechStack } });
+
+    if (checkArray(data.departmentTechStack, findTechStack) === false) {
+      return {
+        status: 400,
+        message: FIND_TECH_STACK_FAILED,
+      };
+    }
+
+    //Find project
+    const findProject = await Project.find({ _id: { $in: data.departmentProject } });
+    if (checkArray(data.departmentProject, findProject) === false) {
+      return {
+        status: 400,
+        message: FIND_PROJECT_FAILED,
+      };
+    }
+
+    //Find employee
+    const findEmployee = await Employee.find({ _id: { $in: data.departmentEmployee } });
+    if (checkArray(data.departmentEmployee, findEmployee) === false) {
+      return {
+        status: 400,
+        message: FIND_EMPLOYEE_FAILED,
+      };
+    }
+
+    //Create Department
     const createDepartment = await Department.create(data);
 
     return {
       status: 200,
-      code: CREATE_DEPARTMENT_SUCCESS,
-      message: 'Create project kind success',
+      message: CREATE_DEPARTMENT_SUCCESS,
       data: createDepartment,
     };
   } catch (err) {
+    createErrorLog({ status: 500, message: SERVER_ERROR });
+
     return {
       status: 500,
-      code: SERVER_ERROR,
-      message: 'Server error',
+      message: SERVER_ERROR,
     };
   }
 };
@@ -58,39 +97,37 @@ const findDepartmentByName = async (data, page, limit) => {
     if (!data.departmentName) {
       return {
         status: 400,
-        code: DEPARTMENT_INPUT_INVALID,
-        message: 'Project kind name invalid',
+        message: DEPARTMENT_INPUT_INVALID,
       };
     }
-    if (typeof (page) !== Number) {
+    if (checkNumber(page)) {
       page = 1;
     }
-    if (typeof (limit) !== Number) {
+    if (checkNumber(limit)) {
       limit = 10;
     }
 
     const findListDepartment = await Search(Department, 'departmentName', data.departmentName, page, limit);
 
-    if (typeof findListDepartment === 'undefined') {
+    if (!findListDepartment) {
       return {
         status: 400,
-        code: FIND_DEPARTMENT_FAILED,
-        message: 'Project kind not found',
+        message: FIND_DEPARTMENT_FAILED,
       };
     }
 
     return {
       status: 200,
-      code: UPDATE_DEPARTMENT_SUCCESS,
-      message: 'Find project kind success',
+      message: FIND_DEPARTMENT_SUCCESS,
       data: findListDepartment,
     };
 
   } catch (err) {
+    createErrorLog({ status: 500, message: SERVER_ERROR });
+
     return {
       status: 500,
-      code: SERVER_ERROR,
-      message: 'Server error',
+      message: SERVER_ERROR,
     };
   }
 };
@@ -99,27 +136,26 @@ const findDepartmentByName = async (data, page, limit) => {
 const findOneDepartment = async (id) => {
   try {
     const findDepartment = await Department.findOne({ _id: id });
-    if (typeof findDepartment === 'undefined') {
+    if (!findDepartment) {
       return {
         status: 400,
-        code: FIND_DEPARTMENT_FAILED,
-        message: 'Project kind not found',
+        message: FIND_DEPARTMENT_FAILED,
       };
     }
-    else {
-      return {
-        status: 200,
-        code: FIND_DEPARTMENT_SUCCESS,
-        message: 'Find project kind success',
-        data: findDepartment,
-      };
-    }
+
+    return {
+      status: 200,
+      message: FIND_DEPARTMENT_SUCCESS,
+      data: findDepartment,
+    };
+
   }
   catch (err) {
+    createErrorLog({ status: 500, message: SERVER_ERROR });
+
     return {
       status: 500,
-      code: SERVER_ERROR,
-      message: 'Server error',
+      message: SERVER_ERROR,
     };
   }
 };
@@ -127,34 +163,26 @@ const findOneDepartment = async (id) => {
 //Update project kind
 const updateDepartment = async (id, data) => {
   try {
-    if (!data.departmentName || !data.departmentResponsibility
-      || !data.departmentTechStackId || !data.departmentProject || !data.departmentEmployee ){
-      return {
-        status: 400,
-        code: DEPARTMENT_INPUT_INVALID,
-        message: 'Missing project kind profile',
-      };
-    }
-    let updateDepartment = await Department.findOneAndUpdate({ _id: id }, data);
+    const updateDepartment = await Department.findOneAndUpdate({ _id: id }, data);
     if (!updateDepartment) {
       return {
         status: 400,
-        code: UPDATE_DEPARTMENT_FAILED,
-        message: 'Update project kind failed',
-      };
-    } else {
-      return {
-        status: 200,
-        code: UPDATE_DEPARTMENT_SUCCESS,
-        message: 'update project kind success',
-        data: updateDepartment,
+        message: UPDATE_DEPARTMENT_FAILED,
       };
     }
+
+    return {
+      status: 200,
+      message: UPDATE_DEPARTMENT_SUCCESS,
+      data: updateDepartment,
+    };
+
   } catch (error) {
+    createErrorLog({ status: 500, message: SERVER_ERROR });
+
     return {
       status: 500,
-      code: SERVER_ERROR,
-      message: 'Server error',
+      message: SERVER_ERROR,
     };
   }
 };
@@ -162,25 +190,24 @@ const updateDepartment = async (id, data) => {
 //Delete project kind
 const deleteDepartment = async (id) => {
   try {
-    let user = await Department.findOneAndRemove({ _id: id });
+    const user = await Department.findOneAndRemove({ _id: id });
     if (!user) {
       return {
         status: 400,
-        code: DELETE_DEPARTMENT_FAILED,
-        message: 'Delete project kind failed',
-      };
-    } else {
-      return {
-        status: 200,
-        code: DELETE_DEPARTMENT_SUCCESS,
-        message: 'Delete project kind success',
+        message: DELETE_DEPARTMENT_FAILED,
       };
     }
+
+    return {
+      status: 200,
+      message: DELETE_DEPARTMENT_SUCCESS,
+    };
   } catch (error) {
+    createErrorLog({ status: 500, message: SERVER_ERROR });
+
     return {
       status: 500,
-      code: SERVER_ERROR,
-      message: 'Server error',
+      message: SERVER_ERROR,
     };
   }
 };
