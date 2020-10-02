@@ -1,4 +1,5 @@
 import ProjectKind from '../../model/projectKind.js';
+import Project from '../../model/project.js';
 import {
   PROJECT_KIND_EXIST,
   CREATE_PROJECT_KIND_SUCCESS,
@@ -9,6 +10,7 @@ import {
   UPDATE_PROJECT_KIND_SUCCESS,
   DELETE_PROJECT_KIND_FAILED,
   DELETE_PROJECT_KIND_SUCCESS,
+  UPDATE_PROJECT_FAILED,
   SERVER_ERROR,
 } from '../../status/status.js';
 
@@ -130,7 +132,7 @@ const findOneProjectKind = async (id) => {
 //Update project kind
 const updateProjectKind = async (id, data) => {
   try {
-    if (!data.projectKindName || !checkNumber(data.projectKindKeyNumber) ) {
+    if (!data.projectKindName || !checkNumber(data.projectKindKeyNumber)) {
       return {
         status: 400,
         message: PROJECT_KIND_INPUT_INVALID,
@@ -169,6 +171,14 @@ const updateProjectKind = async (id, data) => {
 //Delete project kind
 const deleteProjectKind = async (id) => {
   try {
+    const updateProject = await Project.updateOne({ projectKind: id }, { projectKind: null });
+    if (updateProject.n === 0) {
+      return {
+        status: 400,
+        message: UPDATE_PROJECT_FAILED,
+      };
+    }
+
     const deleteProjectKind = await ProjectKind.findOneAndRemove({ _id: id });
     if (!deleteProjectKind) {
       return {

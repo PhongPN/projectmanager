@@ -2,7 +2,7 @@ import {
   createTechStack,
   findOneTechStack,
   findTechStackByName,
-  getTechStack,
+  // getTechStack,
   updateTechStack,
   deleteTechStack,
 } from './teckStack.js';
@@ -34,14 +34,14 @@ export const findTechStackByNameAPI = async (req, res) => {
   }
 };
 
-export const getTechStackAPI = async (req, res) => {
-  try {
-    const result = await getTechStack();
-    res.status(result.status).json(result);
-  } catch (err) {
-    res.status(err.status).json(err);
-  }
-};
+// export const getTechStackAPI = async (req, res) => {
+//   try {
+//     const result = await getTechStack();
+//     res.status(result.status).json(result);
+//   } catch (err) {
+//     res.status(err.status).json(err);
+//   }
+// };
 
 export const updateTechStackAPI = async (req, res) => {
   try {

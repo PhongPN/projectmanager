@@ -25,16 +25,16 @@ const projectSchema = new mongoose.Schema({
   ],
   projectEmployee: [
     {
-      type: String,
+      type: objectId,
       required: true,
       ref: 'employee',
     },
   ],
-}, { collection: 'project' }, { timestamps: { createdAt: Date.now(), updatedAt: 'updateAt' } });
+}, { collection: 'project' }, { timestamps: { createdAt: Date.now(), updatedAt: 'updatedAt' } });
 
 projectSchema.pre('findOneAndUpdate', async function (next) {
   const docToUpdate = await this.model.findOne(this.getQuery());
-  docToUpdate.updateAt = Date.now();
+  docToUpdate.updatedAt = Date.now();
   docToUpdate.save(function (err) {
     if (err) {
       next(err);

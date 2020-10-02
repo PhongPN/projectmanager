@@ -10,8 +10,10 @@ const techStackSchema = new mongoose.Schema({
   },
   techStackStatus: {
     type: String,
+    enum: ['active', 'inactive'],
     required: true,
   },
+
 }, { collection: 'teckstack' }, { timestamps: { createdAt: Date.now(), updatedAt: 'updatedAt' } });
 
 techStackSchema.pre('findOneAndUpdate', async function (next) {

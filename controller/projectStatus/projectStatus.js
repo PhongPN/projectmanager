@@ -1,4 +1,5 @@
 import ProjectStatus from '../../model/projectStatus.js';
+import Project from '../../model/project.js';
 
 import {
   SERVER_ERROR,
@@ -11,6 +12,7 @@ import {
   UPDATE_PROJECT_STATUS_SUCCESS,
   DELETE_PROJECT_STATUS_FAILED,
   DELETE_PROJECT_STATUS_SUCCESS,
+  UPDATE_PROJECT_FAILED,
 } from '../../status/status.js';
 
 import { Search } from '../../middleware/fuzzySearch.js';
@@ -172,6 +174,14 @@ const updateProjectStatus = async (id, data) => {
 //Delete project status
 const deleteProjectStatus = async (id) => {
   try {
+    const updateProject = await Project.updateOne({ projectStatus: id }, { projectStatus: null } );
+    if (updateProject.n === 0) {
+      return {
+        status: 400,
+        message: UPDATE_PROJECT_FAILED,
+      };
+    }
+
     const projectStatus = await ProjectStatus.findOneAndRemove({ _id: id });
     if (!projectStatus) {
       return {
@@ -187,6 +197,7 @@ const deleteProjectStatus = async (id) => {
   } catch (error) {
     createErrorLog({ status: 500, message: SERVER_ERROR });
 
+    console.log(error)
     return {
       status: 500,
       message: SERVER_ERROR,

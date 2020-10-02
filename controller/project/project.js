@@ -2,6 +2,8 @@ import Project from '../../model/project.js';
 import TechStack from '../../model/techStack.js';
 import ProjectKind from '../../model/projectKind.js';
 import ProjectStatus from '../../model/projectStatus.js';
+import Employee from '../../model/employee.js';
+import Department from '../../model/department.js';
 import {
   PROJECT_EXIST,
   CREATE_PROJECT_SUCCESS,
@@ -16,6 +18,8 @@ import {
   FIND_TECH_STACK_FAILED,
   FIND_PROJECT_KIND_FAILED,
   FIND_PROJECT_STATUS_FAILED,
+  UPDATE_EMPLOYEE_FAILED,
+  UPDATE_DEPARTMENT_FAILED,
 } from '../../status/status.js';
 
 import { Search } from '../../middleware/fuzzySearch.js';
@@ -159,7 +163,7 @@ const findOneProject = async (id) => {
 //Update project kind
 const updateProject = async (id, data) => {
   try {
-    const updateProject = await Project.findOneAndUpdate({ _id: id }, data);
+    const updateProject = await Project.findOneAndUpdate({ _id: id }, data, { overwrite: true });
     if (!updateProject) {
       return {
         status: 400,
@@ -172,7 +176,7 @@ const updateProject = async (id, data) => {
         data: updateProject,
       };
     }
-  } catch (error) {
+  } catch (err) {
     return {
       status: 500,
       message: SERVER_ERROR,
@@ -183,6 +187,22 @@ const updateProject = async (id, data) => {
 //Delete project kind
 const deleteProject = async (id) => {
   try {
+    const updateEmployee = await Employee.updateOne({ employeeProject: id }, { $pull: { employeeProject: id } });
+    if (updateEmployee.n === 0) {
+      return {
+        status: 400,
+        message: UPDATE_EMPLOYEE_FAILED,
+      };
+    }
+
+    const updateDepartment = await Department.updateOne({ departmentProject: id }, { $pull: { departmentProject: id } });
+    if (updateDepartment.n === 0) {
+      return {
+        status: 400,
+        message: UPDATE_DEPARTMENT_FAILED,
+      };
+    }
+
     const deleteProject = await Project.findOneAndRemove({ _id: id });
     if (!deleteProject) {
       return {

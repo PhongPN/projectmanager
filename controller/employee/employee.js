@@ -1,12 +1,14 @@
-//Save update $push[], $set{}
+//Save update $push[], $set{}..
 //UpdateOne({})
 //UpdateMany
 //index mongo
-//Populate
-//Enum
+//Populate..
+//Enum..
 
 import Employee from '../../model/employee.js';
 import TechStack from '../../model/techStack.js';
+import Project from '../../model/project.js';
+import Department from '../../model/department.js';
 import {
   EMPLOYEE_EXIST,
   CREATE_EMPLOYEE_SUCCESS,
@@ -19,6 +21,8 @@ import {
   DELETE_EMPLOYEE_SUCCESS,
   SERVER_ERROR,
   FIND_TECH_STACK_FAILED,
+  UPDATE_PROJECT_FAILED,
+  UPDATE_DEPARTMENT_FAILED,
 } from '../../status/status.js';
 
 import { Search } from '../../middleware/fuzzySearch.js';
@@ -88,8 +92,8 @@ const createEmployee = async (data) => {
 };
 
 //Find projects kind by name
-//Set default cs6
-const findEmployeeByName = async (data, page, limit) => {
+//Set default es6
+const findEmployeeByName = async (data, page = 1, limit = 10) => {
   try {
     if (!data.employeeName) {
       return {
@@ -161,7 +165,8 @@ const findOneEmployee = async (id) => {
 const updateEmployee = async (id, data) => {
   try {//update
 
-    const updateEmployee = await Employee.findOneAndUpdate({ _id: id }, data);
+    const updateEmployee = await Employee.findOneAndUpdate({ _id: id }, { $set: data });
+
     if (!updateEmployee) {
       return {
         status: 400,
@@ -188,6 +193,20 @@ const updateEmployee = async (id, data) => {
 //Delete project kind
 const deleteEmployee = async (id) => {
   try {
+    const updateDepartment = await Department.updateOne({ departmentEmployee: id }, { $pull: { departmentEmployee: id } });
+    if (updateDepartment.n === 0) {
+      return {
+        status: 400,
+        message: UPDATE_DEPARTMENT_FAILED,
+      };
+    }
+    const updateProject = await Project.updateOne({ projectEmployee: id }, { $pull: { projectEmployee: id } });
+    if (updateProject.n === 0) {
+      return {
+        status: 400,
+        message: UPDATE_PROJECT_FAILED,
+      };
+    }
     const user = await Employee.findOneAndRemove({ _id: id });
     if (!user) {
       return {

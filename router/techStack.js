@@ -20,7 +20,7 @@ router.get('/techstacks', verifyToken, findTechStackByNameAPI);
 
 //Get tech stack
 
-router.get('/techstacks/all', verifyToken, findTechStackByNameAPI);
+// router.get('/techstacks/all', verifyToken, findTechStackByNameAPI);
 
 //Find project kind
 router.get('/techstacks/:id', verifyToken, findOneTechStackAPI);

@@ -1,5 +1,7 @@
 import TechStack from '../../model/techStack.js';
-
+import Employee from '../../model/employee.js';
+import Department from '../../model/department.js';
+import Project from '../../model/project.js';
 import {
   SERVER_ERROR,
   TECH_STACK_INPUT_INVALID,
@@ -11,6 +13,9 @@ import {
   UPDATE_TECH_STACK_SUCCESS,
   DELETE_TECH_STACK_FAILED,
   DELETE_TECH_STACK_SUCCESS,
+  UPDATE_PROJECT_FAILED,
+  UPDATE_DEPARTMENT_FAILED,
+  UPDATE_EMPLOYEE_FAILED,
 } from '../../status/status.js';
 
 import { Search } from '../../middleware/fuzzySearch.js';
@@ -129,37 +134,24 @@ const findOneTechStack = async (id) => {
 
 //Get all tech stack
 
-const getTechStack = async () => {
-  try {
-    const getTechStack = await TechStack.find({});
-    if (getTechStack) {
-      console.log(getTechStack);
-    }
-  } catch (error) {
-    return {
-      err: error,
-    };
-  }
-};
+// const getTechStack = async () => {
+//   try {
+//     const getTechStack = await TechStack.find({});
+//     if (getTechStack) {
+//       console.log(getTechStack);
+//     }
+//   } catch (error) {
+//     return {
+//       err: error,
+//     };
+//   }
+// };
 
 //Update tech stack
 const updateTechStack = async (id, data) => {
   try {
-    if (!data.techStackName) {
-      return {
-        status: 400,
-        message: TECH_STACK_INPUT_INVALID,
-      };
-    }
+    const techStack = await TechStack.findOneAndUpdate({ _id: id }, data, { overwrite: true });
 
-    if (!checkStatus(data.techStackStatus)) {
-      return {
-        status: 400,
-        message: TECH_STACK_INPUT_INVALID,
-      };
-    }
-
-    const techStack = await TechStack.findOneAndUpdate({ _id: id }, data);
     if (!techStack) {
       return {
         status: 400,
@@ -186,8 +178,33 @@ const updateTechStack = async (id, data) => {
 //Delete tech stack
 const deleteTechStack = async (id) => {
   try {
+    const updateEmployee = await Employee.updateOne({ 'employeeTechStack.techStackId': id }, { $pull: { employeeTechStack: { techStackId: id } } });
+    if (updateEmployee.n === 0) {
+      return {
+        status: 400,
+        message: UPDATE_EMPLOYEE_FAILED,
+      };
+    }
+
+    const updateDepartment = await Department.updateOne({ departmentTechStack: id }, { $pull: { departmentTechStack: id } });
+    if (updateDepartment.n === 0) {
+      return {
+        status: 400,
+        message: UPDATE_DEPARTMENT_FAILED,
+      };
+    }
+
+    const updateProject = await Project.updateOne({ projectTeckStack: id }, { $pull: { projectTeckStack: id } });
+    if (updateProject.n === 0) {
+      return {
+        status: 400,
+        message: UPDATE_PROJECT_FAILED,
+      };
+    }
+
     const techStack = await TechStack.findOneAndRemove({ _id: id });
     if (!techStack) {
+
       return {
         status: 400,
         message: DELETE_TECH_STACK_FAILED,
@@ -198,7 +215,7 @@ const deleteTechStack = async (id) => {
       status: 200,
       message: DELETE_TECH_STACK_SUCCESS,
     };
-  } catch (error) {
+  } catch (err) {
     createErrorLog({ status: 500, message: SERVER_ERROR });
 
     return {
@@ -214,5 +231,5 @@ export {
   findOneTechStack,
   updateTechStack,
   deleteTechStack,
-  getTechStack,
+  // getTechStack,
 };
