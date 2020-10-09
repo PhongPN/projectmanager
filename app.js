@@ -55,3 +55,8 @@ app.listen(port, () => {
 });
 
 export default app;
+
+PORT=8080
+DB_URI="mongodb://localhost:27017/projectmanager"
+TOKEN_LIFE="1h"
+TOKEN_SECRETKEY="phong"
