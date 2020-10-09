@@ -79,7 +79,7 @@ const findProjectStatusByName = async (data, page, limit) => {
 
     const findListProjectStatus = await Search(ProjectStatus, 'projectStatusName', data.projectStatusName, page, limit);
 
-    if (!findListProjectStatus) {
+    if (findListProjectStatus.length === 0) {
       return {
         status: 400,
         message: FIND_PROJECT_STATUS_FAILED,
@@ -134,19 +134,19 @@ const findOneProjectStatus = async (id) => {
 //Update project status
 const updateProjectStatus = async (id, data) => {
   try {
-    if (!data.projectStatusName) {
-      return {
-        status: 400,
-        message: PROJECT_STATUS_INPUT_INVALID,
-      };
-    }
+    // if (!data.projectStatusName) {
+    //   return {
+    //     status: 400,
+    //     message: PROJECT_STATUS_INPUT_INVALID,
+    //   };
+    // }
 
-    if (!checkStatus(data.projectStatusStatus)) {
-      return {
-        status: 400,
-        message: PROJECT_STATUS_INPUT_INVALID,
-      };
-    }
+    // if (!checkStatus(data.projectStatusStatus)) {
+    //   return {
+    //     status: 400,
+    //     message: PROJECT_STATUS_INPUT_INVALID,
+    //   };
+    // }
     const projectStatus = await ProjectStatus.findOneAndUpdate({ _id: id }, data);
     if (!projectStatus) {
       return {
@@ -174,12 +174,15 @@ const updateProjectStatus = async (id, data) => {
 //Delete project status
 const deleteProjectStatus = async (id) => {
   try {
-    const updateProject = await Project.updateOne({ projectStatus: id }, { projectStatus: null } );
-    if (updateProject.n === 0) {
-      return {
-        status: 400,
-        message: UPDATE_PROJECT_FAILED,
-      };
+    const findProject = await Project.find({ projectStatus: id });
+    if (findProject.length !== 0) {
+      const updateProject = await Project.updateOne({ projectStatus: id }, { projectStatus: null });
+      if (updateProject.n === 0) {
+        return {
+          status: 400,
+          message: UPDATE_PROJECT_FAILED,
+        };
+      }
     }
 
     const projectStatus = await ProjectStatus.findOneAndRemove({ _id: id });
@@ -197,7 +200,6 @@ const deleteProjectStatus = async (id) => {
   } catch (error) {
     createErrorLog({ status: 500, message: SERVER_ERROR });
 
-    console.log(error)
     return {
       status: 500,
       message: SERVER_ERROR,

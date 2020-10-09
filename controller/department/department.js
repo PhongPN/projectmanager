@@ -109,7 +109,7 @@ const findDepartmentByName = async (data, page, limit) => {
 
     const findListDepartment = await Search(Department, 'departmentName', data.departmentName, page, limit);
 
-    if (!findListDepartment) {
+    if (findListDepartment.length === 0) {
       return {
         status: 400,
         message: FIND_DEPARTMENT_FAILED,
@@ -190,8 +190,8 @@ const updateDepartment = async (id, data) => {
 //Delete project kind
 const deleteDepartment = async (id) => {
   try {
-    const user = await Department.findOneAndRemove({ _id: id });
-    if (!user) {
+    const deleteDepartment = await Department.findOneAndRemove({ _id: id });
+    if (!deleteDepartment) {
       return {
         status: 400,
         message: DELETE_DEPARTMENT_FAILED,

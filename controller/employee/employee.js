@@ -23,6 +23,7 @@ import {
   FIND_TECH_STACK_FAILED,
   UPDATE_PROJECT_FAILED,
   UPDATE_DEPARTMENT_FAILED,
+  FIND_PROJECT_FAILED,
 } from '../../status/status.js';
 
 import { Search } from '../../middleware/fuzzySearch.js';
@@ -73,6 +74,15 @@ const createEmployee = async (data) => {
       };
     }
 
+    //Find project
+    const findProject = await Project.find({ _id: { $in: data.employeeProject } });
+    if (checkArray(data.employeeProject, findProject) === false) {
+      return {
+        status: 400,
+        message: FIND_PROJECT_FAILED,
+      };
+    }
+
     //Create employee
     const createEmployee = await Employee.create(data);
 
@@ -83,7 +93,7 @@ const createEmployee = async (data) => {
     };
   } catch (err) {
     createErrorLog({ status: 500, message: SERVER_ERROR });
-
+    console.log(err)
     return {
       status: 500,
       message: SERVER_ERROR,
@@ -110,7 +120,7 @@ const findEmployeeByName = async (data, page = 1, limit = 10) => {
 
     const findListEmployee = await Search(Employee, 'employeeName', data.employeeName, page, limit);
     //check lenght
-    if (findListEmployee.lenght === 0) {
+    if (findListEmployee.length === 0) {
       return {
         status: 400,
         message: FIND_EMPLOYEE_FAILED,
@@ -119,7 +129,7 @@ const findEmployeeByName = async (data, page = 1, limit = 10) => {
 
     return {
       status: 200,
-      message: UPDATE_EMPLOYEE_SUCCESS,
+      message: FIND_EMPLOYEE_SUCCESS,
       data: findListEmployee,
     };
 
@@ -165,6 +175,10 @@ const findOneEmployee = async (id) => {
 const updateEmployee = async (id, data) => {
   try {//update
 
+    //create data object
+    // const updateData = {
+
+    // }
     const updateEmployee = await Employee.findOneAndUpdate({ _id: id }, { $set: data });
 
     if (!updateEmployee) {
@@ -182,7 +196,7 @@ const updateEmployee = async (id, data) => {
 
   } catch (error) {
     createErrorLog({ status: 500, message: SERVER_ERROR });
-
+    console.log(error)
     return {
       status: 500,
       message: SERVER_ERROR,
@@ -193,19 +207,26 @@ const updateEmployee = async (id, data) => {
 //Delete project kind
 const deleteEmployee = async (id) => {
   try {
-    const updateDepartment = await Department.updateOne({ departmentEmployee: id }, { $pull: { departmentEmployee: id } });
-    if (updateDepartment.n === 0) {
-      return {
-        status: 400,
-        message: UPDATE_DEPARTMENT_FAILED,
-      };
+    const findDepartment = await Department.find({ departmentEmployee: id });
+    if (findDepartment.length !== 0) {
+      const updateDepartment = await Department.updateOne({ departmentEmployee: id }, { $pull: { departmentEmployee: id } });
+      if (updateDepartment.n === 0) {
+        return {
+          status: 400,
+          message: UPDATE_DEPARTMENT_FAILED,
+        };
+      }
     }
-    const updateProject = await Project.updateOne({ projectEmployee: id }, { $pull: { projectEmployee: id } });
-    if (updateProject.n === 0) {
-      return {
-        status: 400,
-        message: UPDATE_PROJECT_FAILED,
-      };
+
+    const findProject = await Project.find({ departmentEmployee: id });
+    if (findProject.length !== 0) {
+      const updateProject = await Project.updateOne({ projectEmployee: id }, { $pull: { projectEmployee: id } });
+      if (updateProject.n === 0) {
+        return {
+          status: 400,
+          message: UPDATE_PROJECT_FAILED,
+        };
+      }
     }
     const user = await Employee.findOneAndRemove({ _id: id });
     if (!user) {

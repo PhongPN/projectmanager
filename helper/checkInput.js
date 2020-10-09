@@ -1,6 +1,7 @@
 const status = ['active', 'inactive'];
 
 export const checkStatus = (data) => {
+  console.log(data)
   if (status.includes(data)) {
     return true;
   }
@@ -10,12 +11,12 @@ export const checkStatus = (data) => {
 
 export const checkNumber = (...data) => {
   for (let i = 0; i < data.length; i++) {
-    if (Number(data[i])) {
-      return true;
+    if (!Number(data[i])) {
+      return false;
     }
   }
 
-  return false;
+  return true;
 };
 
 export const checkNull = (...data) => {

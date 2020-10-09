@@ -79,7 +79,7 @@ const findProjectKindByName = async (data, page, limit) => {
 
     const findListProjectKind = await Search(ProjectKind, 'projectKindName', data.projectKindName, page, limit);
 
-    if (!findListProjectKind) {
+    if (findListProjectKind.length === 0) {
       return {
         status: 400,
         message: FIND_PROJECT_KIND_FAILED,
@@ -132,19 +132,19 @@ const findOneProjectKind = async (id) => {
 //Update project kind
 const updateProjectKind = async (id, data) => {
   try {
-    if (!data.projectKindName || !checkNumber(data.projectKindKeyNumber)) {
-      return {
-        status: 400,
-        message: PROJECT_KIND_INPUT_INVALID,
-      };
-    }
+    // if (!data.projectKindName || !checkNumber(data.projectKindKeyNumber)) {
+    //   return {
+    //     status: 400,
+    //     message: PROJECT_KIND_INPUT_INVALID,
+    //   };
+    // }
 
-    if (!checkStatus(data.projectKindStatus)) {
-      return {
-        status: 400,
-        message: PROJECT_KIND_INPUT_INVALID,
-      };
-    }
+    // if (!checkStatus(data.projectKindStatus)) {
+    //   return {
+    //     status: 400,
+    //     message: PROJECT_KIND_INPUT_INVALID,
+    //   };
+    // }
     const updateProjectKind = await ProjectKind.findOneAndUpdate({ _id: id }, data);
     if (!updateProjectKind) {
       return {
@@ -171,12 +171,15 @@ const updateProjectKind = async (id, data) => {
 //Delete project kind
 const deleteProjectKind = async (id) => {
   try {
-    const updateProject = await Project.updateOne({ projectKind: id }, { projectKind: null });
-    if (updateProject.n === 0) {
-      return {
-        status: 400,
-        message: UPDATE_PROJECT_FAILED,
-      };
+    const findProject = await Project.find({ projectKind: id });
+    if (findProject.length !== 0) {
+      const updateProject = await Project.updateOne({ projectKind: id }, { projectKind: null });
+      if (updateProject.n === 0) {
+        return {
+          status: 400,
+          message: UPDATE_PROJECT_FAILED,
+        };
+      }
     }
 
     const deleteProjectKind = await ProjectKind.findOneAndRemove({ _id: id });

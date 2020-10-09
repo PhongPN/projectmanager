@@ -60,17 +60,17 @@ const createProject = async (data) => {
     //Find project kind
     const findProjectKind = await ProjectKind.find({ _id: data.projectKind });
 
-    if (!findProjectKind) {
+    if (findProjectKind.length === 0) {
       return {
         status: 400,
         message: FIND_PROJECT_KIND_FAILED,
       };
     }
 
-    //Find project kind
+    //Find project status
     const findProjectStatus = await ProjectStatus.find({ _id: data.projectStatus });
 
-    if (!findProjectStatus) {
+    if (findProjectStatus.length === 0) {
       return {
         status: 400,
         message: FIND_PROJECT_STATUS_FAILED,
@@ -113,7 +113,7 @@ const findProjectByName = async (data, page, limit) => {
 
     const findListProject = await Search(Project, 'projectName', data.projectName, page, limit);
 
-    if (!findListProject) {
+    if (findListProject.length === 0) {
       return {
         status: 400,
         message: FIND_PROJECT_FAILED,
@@ -187,20 +187,26 @@ const updateProject = async (id, data) => {
 //Delete project kind
 const deleteProject = async (id) => {
   try {
-    const updateEmployee = await Employee.updateOne({ employeeProject: id }, { $pull: { employeeProject: id } });
-    if (updateEmployee.n === 0) {
-      return {
-        status: 400,
-        message: UPDATE_EMPLOYEE_FAILED,
-      };
+    const findEmployee = await Employee.find({ employeeProject: id });
+    if (findEmployee.length !== 0) {
+      const updateEmployee = await Employee.updateOne({ employeeProject: id }, { $pull: { employeeProject: id } });
+      if (updateEmployee.n === 0) {
+        return {
+          status: 400,
+          message: UPDATE_EMPLOYEE_FAILED,
+        };
+      }
     }
 
-    const updateDepartment = await Department.updateOne({ departmentProject: id }, { $pull: { departmentProject: id } });
-    if (updateDepartment.n === 0) {
-      return {
-        status: 400,
-        message: UPDATE_DEPARTMENT_FAILED,
-      };
+    const findDepartment = await Department.find({ departmentProject: id });
+    if (findDepartment.length !== 0) {
+      const updateDepartment = await Department.updateOne({ departmentProject: id }, { $pull: { departmentProject: id } });
+      if (updateDepartment.n === 0) {
+        return {
+          status: 400,
+          message: UPDATE_DEPARTMENT_FAILED,
+        };
+      }
     }
 
     const deleteProject = await Project.findOneAndRemove({ _id: id });

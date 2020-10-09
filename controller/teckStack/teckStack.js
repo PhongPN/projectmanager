@@ -81,7 +81,7 @@ const findTechStackByName = async (data, page, limit) => {
 
     const findListTechStack = await Search(TechStack, 'techStackName', data.techStackName, page, limit);
 
-    if (!findListTechStack) {
+    if (findListTechStack.length === 0) {
       return {
         status: 400,
         message: FIND_TECH_STACK_FAILED,
@@ -178,28 +178,37 @@ const updateTechStack = async (id, data) => {
 //Delete tech stack
 const deleteTechStack = async (id) => {
   try {
-    const updateEmployee = await Employee.updateOne({ 'employeeTechStack.techStackId': id }, { $pull: { employeeTechStack: { techStackId: id } } });
-    if (updateEmployee.n === 0) {
-      return {
-        status: 400,
-        message: UPDATE_EMPLOYEE_FAILED,
-      };
+    const findEmployee = await Employee.find({ 'employeeTechStack.techStackId': id });
+    if (findEmployee.length !== 0) {
+      const updateEmployee = await Employee.updateOne({ 'employeeTechStack.techStackId': id }, { $pull: { employeeTechStack: { techStackId: id } } });
+      if (updateEmployee.n === 0) {
+        return {
+          status: 400,
+          message: UPDATE_EMPLOYEE_FAILED,
+        };
+      }
     }
 
-    const updateDepartment = await Department.updateOne({ departmentTechStack: id }, { $pull: { departmentTechStack: id } });
-    if (updateDepartment.n === 0) {
-      return {
-        status: 400,
-        message: UPDATE_DEPARTMENT_FAILED,
-      };
+    const findDepartment = await Department.find({ departmentTechStack: id });
+    if (findDepartment.length !== 0) {
+      const updateDepartment = await Department.updateOne({ departmentTechStack: id }, { $pull: { departmentTechStack: id } });
+      if (updateDepartment.n === 0) {
+        return {
+          status: 400,
+          message: UPDATE_DEPARTMENT_FAILED,
+        };
+      }
     }
 
-    const updateProject = await Project.updateOne({ projectTeckStack: id }, { $pull: { projectTeckStack: id } });
-    if (updateProject.n === 0) {
-      return {
-        status: 400,
-        message: UPDATE_PROJECT_FAILED,
-      };
+    const findProject = await Project.find({ projectTeckStack: id });
+    if (findProject.length !== 0) {
+      const updateProject = await Project.updateOne({ projectTeckStack: id }, { $pull: { projectTeckStack: id } });
+      if (updateProject.n === 0) {
+        return {
+          status: 400,
+          message: UPDATE_PROJECT_FAILED,
+        };
+      }
     }
 
     const techStack = await TechStack.findOneAndRemove({ _id: id });

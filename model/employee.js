@@ -52,16 +52,16 @@ const employeeSchema = new mongoose.Schema({
   ],
 }, { collection: 'employee' }, { timestamps: { createdAt: Date.now(), updatedAt: 'updateAt' } });
 
-employeeSchema.pre('findOneAndUpdate', async function (next) {
-  const docToUpdate = await this.model.findOne(this.getQuery());
-  docToUpdate.updateAt = Date.now();
-  docToUpdate.save(function (err) {
-    if (err) {
-      next(err);
-    }
-  });
-  next();
-});
+// employeeSchema.pre('findOneAndUpdate', async function (next) {
+//   const docToUpdate = await this.model.findOne(this.getQuery());
+//   docToUpdate.updateAt = Date.now();
+//   docToUpdate.save(function (err) {
+//     if (err) {
+//       next(err);
+//     }
+//   });
+//   next();
+// });
 
 const Employee = mongoose.model('employee', employeeSchema);
 
