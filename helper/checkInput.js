@@ -1,7 +1,6 @@
 const status = ['active', 'inactive'];
 
 export const checkStatus = (data) => {
-  console.log(data)
   if (status.includes(data)) {
     return true;
   }

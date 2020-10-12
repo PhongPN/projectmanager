@@ -11,13 +11,6 @@ let should = chai.should();
 
 chai.use(chaiHttp);
 
-describe('TEST', () => {
-  it('TEST', (done) => {
-    const res = checkStatus('active');
-    done()
-  })
-})
-
 describe('Unit Test', () => {
   let token;
   let projectStatusId;

@@ -92,8 +92,8 @@ const createEmployee = async (data) => {
       data: createEmployee,
     };
   } catch (err) {
-    createErrorLog({ status: 500, message: SERVER_ERROR });
-    console.log(err)
+    createErrorLog({ status: 500, message: err });
+
     return {
       status: 500,
       message: SERVER_ERROR,
@@ -134,7 +134,7 @@ const findEmployeeByName = async (data, page = 1, limit = 10) => {
     };
 
   } catch (err) {
-    createErrorLog({ status: 500, message: SERVER_ERROR });
+    createErrorLog({ status: 500, message: err });
 
     return {
       status: 500,
@@ -162,7 +162,7 @@ const findOneEmployee = async (id) => {
     }
   }
   catch (err) {
-    createErrorLog({ status: 500, message: SERVER_ERROR });
+    createErrorLog({ status: 500, message: err });
 
     return {
       status: 500,
@@ -195,8 +195,8 @@ const updateEmployee = async (id, data) => {
     };
 
   } catch (error) {
-    createErrorLog({ status: 500, message: SERVER_ERROR });
-    console.log(error)
+    createErrorLog({ status: 500, message: error });
+
     return {
       status: 500,
       message: SERVER_ERROR,
@@ -242,7 +242,7 @@ const deleteEmployee = async (id) => {
     };
 
   } catch (error) {
-    createErrorLog({ status: 500, message: SERVER_ERROR });
+    createErrorLog({ status: 500, message: error });
 
     return {
       status: 500,
